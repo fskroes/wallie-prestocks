@@ -1,0 +1,186 @@
+/**
+ * The Jupiter swap executor: USDC → a PreStocks token, on Solana mainnet.
+ *
+ * Two calls to Jupiter's public lite API (no key):
+ *   GET  /swap/v1/quote   route and expected out amount for an exact USDC in
+ *   POST /swap/v1/swap    a versioned transaction for that quote, signed here
+ *
+ * PreStocks mints are Token-2022 with a 100 bps transfer fee and a ScaledUiAmount
+ * extension. Jupiter's `outAmount` is in raw base units (9 decimals);
+ * `outAmountUi` applies the decimals and the multiplier in force so the figure
+ * matches what a wallet shows and what the PreStocks API prices. On 2026-09-20
+ * SPACEX ran at 5x (a split) and OPENAI at 1.4861347x; ANTHROPIC at 1x.
+ *
+ * Nothing here touches the allowance. The policy lives in src/agent.ts; this
+ * file only knows how to price and land one swap. `http` is injectable so tests
+ * replay the fixtures under ./fixtures and never reach the network.
+ */
+import { Connection, Keypair, PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { isPreStocksMint } from "./prestocks.ts";
+
+export const JUP_API = "https://lite-api.jup.ag/swap/v1";
+export const USDC_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+export const PRESTOCKS_DECIMALS = 9;
+
+export interface JupQuote {
+  inputMint: string;
+  inAmount: string;
+  outputMint: string;
+  outAmount: string;
+  otherAmountThreshold: string;
+  swapMode: string;
+  slippageBps: number;
+  priceImpactPct: string;
+  routePlan: Array<{ swapInfo: { ammKey: string; label: string; inputMint: string; outputMint: string; inAmount: string; outAmount: string }; percent: number }>;
+  contextSlot?: number;
+  swapUsdValue?: string;
+}
+
+export interface Quote {
+  mint: string;
+  usdcMicro: bigint;
+  outRaw: bigint;
+  /** Tokens out, in UI units after decimals and the ScaledUiAmount multiplier. */
+  outUi: number;
+  /** USD paid per UI token at this quote: usdc / outUi. */
+  fillPrice: number;
+  minOutRaw: bigint;
+  priceImpact: number;
+  slippageBps: number;
+  route: string[];
+  raw: JupQuote;
+}
+
+export type HttpLike = (url: string, init?: { method?: string; headers?: Record<string, string>; body?: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
+
+export interface QuoteOptions {
+  mint: string;
+  usdcMicro: bigint;
+  slippageBps?: number;
+  /** ScaledUiAmount multiplier from the mint. 1 unless PreStocks splits a token. */
+  uiMultiplier?: number;
+  http?: HttpLike;
+}
+
+export function outAmountUi(outRaw: bigint, uiMultiplier = 1): number {
+  return (Number(outRaw) / 10 ** PRESTOCKS_DECIMALS) * uiMultiplier;
+}
+
+export async function quoteBuy(o: QuoteOptions): Promise<Quote> {
+  if (!isPreStocksMint(o.mint)) throw new Error(`${o.mint} is not a PreStocks mint; this buyer only buys PreStocks`);
+  if (o.usdcMicro <= 0n) throw new Error("usdcMicro must be positive");
+  const slippageBps = o.slippageBps ?? 100;
+  const http = o.http ?? (fetch as unknown as HttpLike);
+  const q = new URLSearchParams({ inputMint: USDC_MAINNET, outputMint: o.mint, amount: o.usdcMicro.toString(), slippageBps: String(slippageBps) });
+  const res = await http(`${JUP_API}/quote?${q}`);
+  if (!res.ok) throw new Error(`Jupiter quote HTTP ${res.status}`);
+  const raw = (await res.json()) as JupQuote & { error?: string };
+  if (raw.error) throw new Error(`Jupiter quote: ${raw.error}`);
+  if (raw.outputMint !== o.mint) throw new Error(`Jupiter quoted ${raw.outputMint}, asked for ${o.mint}`);
+  const outRaw = BigInt(raw.outAmount);
+  const outUi = outAmountUi(outRaw, o.uiMultiplier);
+  return {
+    mint: o.mint,
+    usdcMicro: o.usdcMicro,
+    outRaw,
+    outUi,
+    fillPrice: Number(o.usdcMicro) / 1e6 / outUi,
+    minOutRaw: BigInt(raw.otherAmountThreshold),
+    priceImpact: Number(raw.priceImpactPct),
+    slippageBps,
+    route: raw.routePlan.map((r) => r.swapInfo.label),
+    raw,
+  };
+}
+
+export interface SwapOptions {
+  quote: Quote;
+  payer: Keypair;
+  connection: Connection;
+  http?: HttpLike;
+  /** Skip sending; return the signed transaction bytes. For dry runs. */
+  dryRun?: boolean;
+}
+
+export interface SwapResult {
+  signature?: string;
+  slot?: number;
+  /** base64 of the signed transaction, for a dry run or for a record. */
+  signedTx: string;
+  dryRun: boolean;
+}
+
+export async function buildSwapTx(quote: Quote, payer: PublicKey, http: HttpLike = fetch as unknown as HttpLike): Promise<VersionedTransaction> {
+  const res = await http(`${JUP_API}/swap`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      userPublicKey: payer.toBase58(),
+      quoteResponse: quote.raw,
+      dynamicComputeUnitLimit: true,
+      prioritizationFeeLamports: "auto",
+    }),
+  });
+  if (!res.ok) throw new Error(`Jupiter swap HTTP ${res.status}`);
+  const body = (await res.json()) as { swapTransaction?: string; error?: string };
+  if (!body.swapTransaction) throw new Error(`Jupiter swap: ${body.error ?? "no transaction returned"}`);
+  return VersionedTransaction.deserialize(Buffer.from(body.swapTransaction, "base64"));
+}
+
+export async function executeSwap(o: SwapOptions): Promise<SwapResult> {
+  const tx = await buildSwapTx(o.quote, o.payer.publicKey, o.http);
+  tx.sign([o.payer]);
+  const signedTx = Buffer.from(tx.serialize()).toString("base64");
+  if (o.dryRun) return { signedTx, dryRun: true };
+  const signature = await o.connection.sendRawTransaction(tx.serialize(), { skipPreflight: false, maxRetries: 3 });
+  const bh = await o.connection.getLatestBlockhash("confirmed");
+  const conf = await o.connection.confirmTransaction({ signature, ...bh }, "confirmed");
+  if (conf.value.err) throw new Error(`swap ${signature} failed: ${JSON.stringify(conf.value.err)}`);
+  return { signature, slot: conf.context.slot, signedTx, dryRun: false };
+}
+
+export interface ScaledUiState {
+  multiplier?: string | number;
+  newMultiplier?: string | number;
+  newMultiplierEffectiveTimestamp?: string | number;
+}
+
+/**
+ * The multiplier in force now. Token-2022 keeps two: `multiplier` and a
+ * scheduled `newMultiplier` that takes effect at a unix timestamp. On
+ * 2026-09-20 SPACEX had multiplier 1 and newMultiplier 5 already in effect
+ * (a 5-for-1 split), so reading only `multiplier` would understate a fill by 5x.
+ */
+export function effectiveMultiplier(state: ScaledUiState | undefined, nowSec = Math.floor(Date.now() / 1000)): number {
+  if (!state) return 1;
+  const cur = Number(state.multiplier ?? 1);
+  const next = Number(state.newMultiplier ?? cur);
+  const at = Number(state.newMultiplierEffectiveTimestamp ?? 0);
+  const m = at > 0 && at <= nowSec ? next : cur;
+  return m > 0 && Number.isFinite(m) ? m : 1;
+}
+
+/** Read the ScaledUiAmount multiplier off a Token-2022 mint, 1 if the extension is absent. */
+export async function uiMultiplier(connection: Connection, mint: string): Promise<number> {
+  const info = await connection.getParsedAccountInfo(new PublicKey(mint));
+  const data = info.value?.data;
+  if (!data || !("parsed" in data)) return 1;
+  const ext = (data.parsed as { info?: { extensions?: Array<{ extension: string; state?: ScaledUiState }> } }).info?.extensions?.find(
+    (e) => e.extension === "scaledUiAmountConfig",
+  );
+  return effectiveMultiplier(ext?.state);
+}
+
+/** An http that answers from recorded responses, keyed by "METHOD path-prefix". */
+export function replayHttp(map: Record<string, unknown>): HttpLike {
+  return async (url, init) => {
+    const method = init?.method ?? "GET";
+    const path = new URL(url).pathname;
+    const key = Object.keys(map).find((k) => {
+      const [m, p] = k.split(" ");
+      return m === method && path.endsWith(p);
+    });
+    if (!key) return { ok: false, status: 404, json: async () => ({ error: `no fixture for ${method} ${path}` }) };
+    return { ok: true, status: 200, json: async () => map[key] };
+  };
+}

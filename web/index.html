@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wallie PreStocks · Buy the discount, inside an allowance</title>
+<meta name="description" content="A Wallie agent watches the 8 PreStocks tokenized pre-IPO stocks on Solana, pays a cent per premium report over x402, and buys the discount on Jupiter under a spending limit it cannot exceed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbfbfc; --panel:#fff; --panel2:#f4f4f8; --ink:#121318; --mut:#5f626d;
+  --line:#e9e9ee; --line2:#dcdce4; --acc:#127a4a; --acc-ink:#fff; --acc2:#5044e4;
+  --soft:#edf7f1; --lock:#6d3fd4; --lock-soft:#efe9fc; --ok:#2c8f56; --warn:#b7791f; --bad:#c62f28;
+  --code-bg:#f7f7fb; --code-ink:#121318; --shadow-sm:0 1px 2px rgba(18,19,24,.05),0 8px 24px rgba(18,19,24,.04);
+  --sans:'Instrument Sans',ui-sans-serif,system-ui,sans-serif; --serif:'Instrument Serif',Georgia,serif;
+  --mono:'Spline Sans Mono',ui-monospace,Menlo,monospace; --r:14px; --ease:cubic-bezier(.22,1,.36,1);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#0d0e13; --panel:#15161d; --panel2:#1a1b24; --ink:#ecedf2; --mut:#8f92a0; --line:#23242d; --line2:#2e2f3a;
+  --acc:#3fca85; --acc-ink:#04180e; --acc2:#8b85ff; --soft:#12241a; --lock:#b79cff; --lock-soft:#241a3a;
+  --ok:#5fd68c; --warn:#d29922; --bad:#ff7b72; --code-bg:#0a0b10; --code-ink:#ecedf2; --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --bg:#0d0e13; --panel:#15161d; --panel2:#1a1b24; --ink:#ecedf2; --mut:#8f92a0; --line:#23242d; --line2:#2e2f3a;
+  --acc:#3fca85; --acc-ink:#04180e; --acc2:#8b85ff; --soft:#12241a; --lock:#b79cff; --lock-soft:#241a3a;
+  --ok:#5fd68c; --warn:#d29922; --bad:#ff7b72; --code-bg:#0a0b10; --code-ink:#ecedf2; --shadow-sm:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--acc)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 max(16px,4vw)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+header .brand{font-weight:700;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+header .brand i{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--acc);color:var(--acc-ink);font:700 13px var(--sans);font-style:normal;margin-right:8px}
+header nav a{margin-left:18px;font-size:14px;color:var(--mut);text-decoration:none}
+header nav a:hover{color:var(--ink)}
+#theme{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 9px;cursor:pointer;margin-left:16px}
+.hero{padding:64px 0 28px}
+.kick{font:500 12.5px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--mut)}
+.kick b{color:var(--acc)}
+h1{font-size:clamp(30px,4.6vw,50px);letter-spacing:-.04em;line-height:1.05;max-width:16em;margin:12px 0 0}
+h1 em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--acc)}
+.hero p{color:var(--mut);max-width:44em;margin-top:16px;font-size:17px}
+h2{font-size:clamp(22px,3vw,30px);letter-spacing:-.03em;line-height:1.15;margin:0}
+.kicker{font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);font-weight:600;margin:0 0 10px}
+.prose{color:var(--mut);max-width:44em;margin-top:10px;font-size:16px}
+section{padding:44px 0;border-top:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:22px;margin-top:24px}
+.btn{display:inline-block;padding:11px 18px;border-radius:10px;font-weight:600;text-decoration:none;font-size:15px;margin:22px 10px 0 0}
+.btn.acc{background:var(--acc);color:var(--acc-ink)} .btn.line{border:1px solid var(--line2);color:var(--ink)}
+.note{color:var(--mut);font-size:13.5px;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:720px){.stats{grid-template-columns:1fr}}
+.stat .k{font:500 12px/1.2 var(--mono);color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.stat .v{font:500 clamp(22px,2.6vw,30px)/1.05 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .v b{font-weight:500}
+.stat.disc .v{color:var(--ok)} .stat.prem .v{color:var(--warn)}
+.board-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.board{width:100%;border-collapse:collapse;font-size:15px;min-width:760px}
+.board th,.board td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+.board tr:last-child td{border-bottom:0}
+.board th{font:500 12px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.board td.num,.board th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.board .flag{width:22px;color:var(--mut)} .board tr.disc .flag,.board tr.disc .prem-cell{color:var(--ok);font-weight:600}
+.board tr.prem .flag,.board tr.prem .prem-cell{color:var(--warn);font-weight:600}
+.board tr.watched .sym{font-weight:700}
+.board .name{display:block;font-size:12px;color:var(--mut);font-weight:400}
+.board .mint a{font:400 12px var(--mono)}
+.head{font:400 13px/1.7 var(--mono);color:var(--mut)} .head b{color:var(--ink)}
+.addr{font:400 12px var(--mono);color:var(--mut);word-break:break-all}
+.timeline{display:grid;gap:12px;margin-top:14px}
+.poll{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start}
+@media (max-width:640px){.poll{grid-template-columns:1fr}}
+.money{font:500 13px/1.7 var(--mono);color:var(--mut)} .money b{color:var(--ink);font-weight:600}
+.money .esc{color:var(--lock)} .money .chg{color:var(--acc)} .money .ref{color:var(--ok)}
+.alert{display:inline-block;font:500 12px var(--mono);padding:4px 9px;border-radius:999px;margin:0 6px 8px 0;border:1px solid currentColor;color:var(--mut)}
+.alert.warn{color:var(--warn)} .alert.bad{color:var(--bad)} .alert.lock{color:var(--lock)} .alert.ok{color:var(--ok)}
+.buy{font:400 13.5px/1.6 var(--sans);padding:8px 12px;border-radius:10px;background:var(--panel2);margin-top:4px}
+.buy b{font-family:var(--mono);font-size:13px} .buy.yes b{color:var(--ok)} .buy.no b{color:var(--mut)}
+.buy .q{display:block;font:400 12px var(--mono);color:var(--mut)}
+pre.rep{margin:14px 0 0;font:400 12.5px/1.6 var(--mono);white-space:pre-wrap;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto}
+.rails{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
+@media(max-width:720px){.rails{grid-template-columns:1fr}}
+.rail{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.rail h3{margin:0 0 6px;font-size:16px;letter-spacing:-.01em} .rail p{margin:0;color:var(--mut);font-size:14px}
+.rail code{font:400 12.5px var(--mono);background:var(--code-bg);padding:1px 5px;border-radius:5px}
+footer{padding:40px 0;color:var(--mut);font-size:13.5px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="brand" href="https://www.onewallie.com/"><i>W</i>wallie</a>
+  <nav><a href="#board">Board</a><a href="#run">Run</a><a href="#rails">Rails</a><a href="https://github.com/fskroes/wallie-prestocks">GitHub</a><button id="theme" aria-label="Toggle theme">☀</button></nav>
+</header>
+
+<section class="hero" style="border-top:0">
+  <p class="kick">Stocklana · <b>PreStocks bounty</b></p>
+  <h1>Buy the discount. <em>Never past the allowance.</em></h1>
+  <p>PreStocks tokenizes pre-IPO shares on Solana and publishes a mark price next to the token price. When a token trades well under its mark, a Wallie agent pays a cent for the report, decides, and buys on Jupiter. Every cent of data and every dollar of stock comes out of one allowance the agent cannot exceed.</p>
+  <a class="btn acc" href="#run">See the agent decide →</a>
+  <a class="btn line" href="https://github.com/fskroes/wallie-prestocks">Source on GitHub</a>
+  <p id="data-error" class="note" hidden>The run data could not be loaded. Run <code>node demo/run.ts --out web/data.json</code>.</p>
+</section>
+
+<section id="board">
+  <p class="kicker">All 8 PreStocks, ranked</p>
+  <h2>Token price against mark, right now.</h2>
+  <p class="prose">Straight from <code>prestocks.com/api/prestocks</code>. Premium is token ÷ mark − 1. Holders and daily volume come from <code>/api/stats</code>. Bold rows are on the agent's watchlist.</p>
+  <div class="card">
+    <div class="stats" style="margin-bottom:18px">
+      <div class="stat disc"><div class="k">deepest discount</div><div class="v" id="cheapest">—</div></div>
+      <div class="stat prem"><div class="k">highest premium</div><div class="v" id="dearest">—</div></div>
+      <div class="stat"><div class="k">report cost</div><div class="v">$0.01</div></div>
+    </div>
+    <div class="board-wrap"><table class="board">
+      <thead><tr><th></th><th>PreStock</th><th class="num">token</th><th class="num">mark</th><th class="num">premium</th><th class="num">holders</th><th class="num">volume / day</th><th>mint</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="note" id="board-when"></p>
+  </div>
+</section>
+
+<section id="run">
+  <p class="kicker">Recorded run</p>
+  <h2>The agent pays, watches, and buys.</h2>
+  <p class="prose">Every poll opens a $0.10 x402 channel, is charged $0.01 for the report, and gets $0.09 back. A <b>discount</b> alert on a symbol in the buy list goes through the buy policy: budget, per-trade cap, price impact, and a fill ceiling against mark. Refusals are logged with the reason, not thrown.</p>
+  <div class="card">
+    <div class="head" id="run-head"></div>
+    <div class="timeline" id="timeline"></div>
+    <p class="money" id="run-total" style="margin-top:16px"></p>
+  </div>
+  <div class="card">
+    <div class="head">one ledger for reports and stock</div>
+    <pre class="rep" id="ledger"></pre>
+  </div>
+</section>
+
+<section id="rails">
+  <p class="kicker">Guardrails</p>
+  <h2>What stands between the alert and the swap.</h2>
+  <p class="prose">The Wallie allowance sees a buy as a payment to Jupiter. Every rail that governs a paid API call governs the swap too, and the buy policy adds four of its own.</p>
+  <div class="rails">
+    <div class="rail"><h3>Allowance rails (allowance-kit)</h3><p>Host allowlist, per-call cap, rolling velocity limit, lifetime budget, human approval above a threshold, kill switch. A refused buy is a <code>blocked</code> row in the ledger.</p></div>
+    <div class="rail"><h3>Buy policy (this repo)</h3><p><code>maxPerTradeUsd</code>, <code>maxTotalUsd</code>, <code>maxPriceImpact</code> from Jupiter's quote, <code>maxFillOverMark</code> against the PreStocks mark. One buy per symbol per session.</p></div>
+    <div class="rail"><h3>Only PreStocks</h3><p>The executor refuses any mint that is not a <code>Pre…</code> Token-2022 mint. It reads the ScaledUiAmount multiplier off the mint so a 5-for-1 split (SPACEX, 2026-06) prices correctly.</p></div>
+    <div class="rail"><h3>Dry run first</h3><p>The demo quotes live Jupiter routes and signs nothing. Real swaps need <code>--i-mean-mainnet</code>, a funded key, and a 5-second countdown.</p></div>
+  </div>
+  <p class="note">Nothing on this page is investment advice. PreStocks tokens are not available to U.S. persons or other ineligible persons; see <a href="https://prestocks.com/">prestocks.com</a>. The agent is deterministic and needs no LLM.</p>
+</section>
+
+<footer>© 2026 <a href="https://www.onewallie.com/">onewallie.com</a> · MIT · <a href="https://github.com/fskroes/wallie-prestocks">wallie-prestocks</a> · runtime <a href="https://www.npmjs.com/package/allowance-kit">allowance-kit</a></footer>
+</div>
+<script>
+(function(){const r=document.documentElement;try{const t=localStorage.getItem("theme");if(t)r.dataset.theme=t}catch{}
+document.getElementById("theme").onclick=()=>{const next=(r.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"))==="dark"?"light":"dark";r.dataset.theme=next;try{localStorage.setItem("theme",next)}catch{}};})();
+</script>
+<script src="prestocks.js" data-src="data.json"></script>
+</body>
+</html>
