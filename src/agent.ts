@@ -25,7 +25,7 @@
  */
 import { payingFetch, type PaidResult, type PayContext } from "allowance-kit";
 import type { Line, PremiumReport } from "./report.ts";
-import type { Quote } from "./jupiter.ts";
+import { fmtToken, type Quote } from "./jupiter.ts";
 
 export interface WatchRules {
   /** Alert when premium ≤ −minDiscount. 0.03 = 3% below mark. */
@@ -60,7 +60,10 @@ export interface Alert {
 export interface BuyDecision {
   symbol: string;
   mint: string;
+  /** Micro-USD the policy approved and the ledger records. */
   usdcMicro: bigint;
+  /** What the wallet actually spent: USDC or EURC, base units, and the USD price used. */
+  pay?: Quote["pay"];
   /** Why it did or did not go ahead, in one line. */
   reason: string;
   allowed: boolean;
@@ -174,6 +177,9 @@ export async function decideBuy(o: {
     return { ...base, usdcMicro, quote, reason: `fill $${quote.fillPrice.toFixed(2)} is above ${usd(BigInt(Math.round(ceiling * 1e6)))} (mark + ${(policy.maxFillOverMark * 100).toFixed(1)}%)` };
   }
 
+  // The ledger is in USD. When the wallet pays in EURC the row still says $5.00;
+  // the decision carries the EURC amount so the page can show both.
+  const spent = quote.pay.symbol === "USDC" ? "" : ` for ${fmtToken(quote.pay.amountRaw, quote.pay)}`;
   try {
     const r = await o.executor.swap(quote);
     if (!r.dryRun && r.signature) {
@@ -185,16 +191,19 @@ export async function decideBuy(o: {
       ...base,
       allowed: true,
       usdcMicro,
+      pay: quote.pay,
       quote,
       signature: r.signature,
       slot: r.slot,
       dryRun: r.dryRun,
       recorded: !r.dryRun && !!r.signature,
-      reason: r.dryRun ? `dry run: would buy ${quote.outUi.toFixed(4)} ${line.symbol} at $${quote.fillPrice.toFixed(2)} via ${quote.route.join(" → ")}` : `bought ${quote.outUi.toFixed(4)} ${line.symbol} at $${quote.fillPrice.toFixed(2)} via ${quote.route.join(" → ")}`,
+      reason: r.dryRun
+        ? `dry run: would buy ${quote.outUi.toFixed(4)} ${line.symbol} at $${quote.fillPrice.toFixed(2)}${spent} via ${quote.route.join(" → ")}`
+        : `bought ${quote.outUi.toFixed(4)} ${line.symbol} at $${quote.fillPrice.toFixed(2)}${spent} via ${quote.route.join(" → ")}`,
     };
   } catch (e) {
     await release();
-    return { ...base, usdcMicro, quote, reason: `swap failed: ${(e as Error).message}` };
+    return { ...base, usdcMicro, pay: quote.pay, quote, reason: `swap failed: ${(e as Error).message}` };
   }
 }
 

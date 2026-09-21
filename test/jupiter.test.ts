@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Keypair, VersionedTransaction } from "@solana/web3.js";
-import { buildSwapTx, effectiveMultiplier, executeSwap, outAmountUi, quoteBuy, replayHttp, USDC_MAINNET } from "../src/jupiter.ts";
-import { FIXTURE_PAYER, QUOTE_ANTHROPIC, QUOTE_SPACEX, SWAP_SPACEX } from "./helpers.ts";
+import { buildSwapTx, effectiveMultiplier, executeSwap, fmtToken, outAmountUi, payAmountRaw, payToken, PAY_TOKENS, quoteBuy, replayHttp, tokenUsdPrice, EURC_MAINNET, USDC_MAINNET } from "../src/jupiter.ts";
+import { FIXTURE_PAYER, PRICE_EURC, QUOTE_ANTHROPIC, QUOTE_SPACEX, QUOTE_SPACEX_EURC, SWAP_SPACEX } from "./helpers.ts";
 
 const ANTHROPIC = "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw";
 const SPACEX = "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh";
@@ -92,4 +92,48 @@ test("Jupiter swap without a transaction is an error", async () => {
   const http = replayHttp({ "GET /quote": QUOTE_SPACEX, "POST /swap": { error: "rate limited" } });
   const q = await quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http });
   await assert.rejects(buildSwapTx(q, FIXTURE_PAYER.publicKey, http), /rate limited/);
+});
+
+test("paying in EURC: $5 becomes 4.360445 EURC at Jupiter's price, the quote is checked against the pay mint, the amount and Jupiter's own USD value", async () => {
+  const http = replayHttp({ "GET /quote": QUOTE_SPACEX_EURC, "GET /price/v3": PRICE_EURC });
+  const q = await quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http, uiMultiplier: 5, payToken: PAY_TOKENS.EURC });
+  assert.equal(q.usdcMicro, 5_000_000n, "the ledger figure stays in USD");
+  assert.equal(q.pay.symbol, "EURC");
+  assert.equal(q.pay.mint, EURC_MAINNET);
+  assert.equal(q.pay.amountRaw, 4_360_445n);
+  assert.ok(Math.abs(q.pay.usdPrice - 1.14667) < 1e-4, String(q.pay.usdPrice));
+  assert.equal(q.outRaw, 8_263_788n);
+  assert.ok(q.fillPrice > 120 && q.fillPrice < 122, String(q.fillPrice));
+  assert.deepEqual(q.route, ["DefiTuna", "Meteora DLMM"]);
+  assert.equal(q.raw.inputMint, EURC_MAINNET);
+
+  // USDC needs no price call and spends exactly the micro-USD.
+  const u = await quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http: replayHttp({ "GET /quote": QUOTE_SPACEX }), uiMultiplier: 5 });
+  assert.equal(u.pay.symbol, "USDC");
+  assert.equal(u.pay.amountRaw, 5_000_000n);
+  assert.equal(u.pay.usdPrice, 1);
+
+  // A caller-supplied price is used as is; the amount follows it.
+  assert.equal(payAmountRaw(5_000_000n, PAY_TOKENS.EURC, 1.25), 4_000_000n);
+  assert.equal(payAmountRaw(5_000_000n, PAY_TOKENS.USDC, 1), 5_000_000n);
+  assert.throws(() => payAmountRaw(1n, PAY_TOKENS.EURC, 0), /bad EURC price/);
+  assert.throws(() => payToken("USDT"), /unknown pay token/);
+  assert.equal(fmtToken(4_360_445n, PAY_TOKENS.EURC), "4.360445 EURC");
+});
+
+test("paying in EURC: a stale price is refused when Jupiter's USD value disagrees, and a USDC quote is refused for an EURC buy", async () => {
+  // Pretend EURC were $1.00: the same $5 would send 5 EURC, worth $5.73. The fixture quote is
+  // for 4.360445 EURC, so the amount check fires first; then hand it a matching in-amount and
+  // let the USD-drift check catch it.
+  const http = replayHttp({ "GET /quote": QUOTE_SPACEX_EURC });
+  await assert.rejects(quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http, payToken: PAY_TOKENS.EURC, payUsdPrice: 1 }), /quoted 4360445 in, asked for 5000000/);
+  // Jupiter would value 5 EURC at $5.73; the recording says $5.00 for 4.36 EURC, so forge both fields.
+  const drifted = { ...(QUOTE_SPACEX_EURC as object), inAmount: "5000000", swapUsdValue: "5.7333" };
+  await assert.rejects(quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http: replayHttp({ "GET /quote": drifted }), payToken: PAY_TOKENS.EURC, payUsdPrice: 1 }), /policy approved \$5.00/);
+  // Jupiter's swapUsdValue for the recorded EURC quote is $5.00; at the recorded price the check passes (previous test).
+  // An answer for the wrong input mint is refused before any of that.
+  await assert.rejects(quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http: replayHttp({ "GET /quote": QUOTE_SPACEX, "GET /price/v3": PRICE_EURC }), payToken: PAY_TOKENS.EURC }), /asked to pay with EURC/);
+  // No price, no buy.
+  await assert.rejects(quoteBuy({ mint: SPACEX, usdcMicro: 5_000_000n, http: replayHttp({ "GET /price/v3": {} }), payToken: PAY_TOKENS.EURC }), /no USD price/);
+  await assert.rejects(tokenUsdPrice(EURC_MAINNET, replayHttp({})), /HTTP 404/);
 });

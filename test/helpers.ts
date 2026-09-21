@@ -17,6 +17,8 @@ export const PRESTOCKS = loadJson<PreStockRaw[]>("prestocks-2026-09-20.json");
 export const STATS = loadJson("stats-2026-09-20.json");
 export const QUOTE_ANTHROPIC = loadJson("quote-anthropic-5usd.json");
 export const QUOTE_SPACEX = loadJson("quote-spacex-5usd.json");
+export const QUOTE_SPACEX_EURC = loadJson("quote-spacex-5usd-eurc.json");
+export const PRICE_EURC = loadJson("price-eurc-2026-09-21.json");
 export const SWAP_SPACEX = loadJson("swap-spacex-5usd.json");
 
 /** The payer the recorded Jupiter swap fixture was built for (seed = 32 × 0x07). */
@@ -32,12 +34,12 @@ export function solanaKeyJson(): string {
   return JSON.stringify(Array.from(Buffer.concat([seed, pub])));
 }
 
-export async function buyer(usd: number, policy: Record<string, unknown> = {}): Promise<LiveAgentRuntime> {
+export async function buyer(usd: number, policy: Record<string, unknown> = {}, network = "solana-devnet"): Promise<LiveAgentRuntime> {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "wallie-prestocks-"));
   const rt = await createLiveAgent({
     stateDir: dir,
     privateKey: solanaKeyJson(),
-    network: "solana-devnet",
+    network,
     rpcUrl: "http://127.0.0.1:1",
     checkOnChainBalance: false,
     preferScheme: "upto",
@@ -65,13 +67,16 @@ export function recordedExecutor(opts: { dryRun?: boolean; fail?: string; impact
     quote: async (mint, usdcMicro) => {
       const raw = QUOTE_SPACEX as { outputMint: string };
       // SPACEX ran a 5x ScaledUiAmount multiplier on 2026-09-20; the live executor reads it off the mint.
-      const q = await quoteBuy({ mint: raw.outputMint, usdcMicro, http, uiMultiplier: 5 });
+      // The fixture is one recorded $5 quote. Quote at that amount (quoteBuy checks the in-amount
+      // against the recording), then scale to what the policy asked for.
+      const q = await quoteBuy({ mint: raw.outputMint, usdcMicro: 5_000_000n, http, uiMultiplier: 5 });
       // Tests ask for other mints; the fixture is one route. Re-label so the policy sees the symbol it asked for.
       const scaled = { ...q, mint, usdcMicro, priceImpact: opts.impact ?? q.priceImpact };
       if (usdcMicro !== q.usdcMicro) {
         const k = Number(usdcMicro) / Number(q.usdcMicro);
         scaled.outRaw = BigInt(Math.round(Number(q.outRaw) * k));
         scaled.outUi = q.outUi * k;
+        scaled.pay = { ...q.pay, amountRaw: BigInt(Math.round(Number(q.pay.amountRaw) * k)) };
       }
       return scaled;
     },

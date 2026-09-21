@@ -3,14 +3,14 @@
  * wallie-prestocks CLI
  *
  *   report [--band 0.02] [--json]          the premium report, live from prestocks.com
- *   quote <SYMBOL> [--usd 5] [--json]      a Jupiter buy quote for one PreStock (read-only)
+ *   quote <SYMBOL> [--usd 5] [--pay-with USDC|EURC] [--json]   a Jupiter buy quote for one PreStock (read-only)
  *   serve [--port 8402] [--network solana-devnet]   run the paid report server (in-memory settlement)
  *   mints                                  the 8 mints, one per line
  */
 import { Connection } from "@solana/web3.js";
 import { fetchPreStocks, fetchStats } from "./prestocks.ts";
 import { buildReport, renderReport } from "./report.ts";
-import { quoteBuy, uiMultiplier } from "./jupiter.ts";
+import { fmtToken, payToken, quoteBuy, uiMultiplier } from "./jupiter.ts";
 import { startReportServer } from "./server.ts";
 
 const args = process.argv.slice(2);
@@ -40,11 +40,12 @@ async function main(): Promise<void> {
       const usd = Number(flag("usd") ?? 5);
       const conn = new Connection(flag("rpc") ?? "https://api.mainnet-beta.solana.com");
       const mult = await uiMultiplier(conn, s.mint);
-      const q = await quoteBuy({ mint: s.mint, usdcMicro: BigInt(Math.round(usd * 1e6)), uiMultiplier: mult });
-      if (has("json")) console.log(JSON.stringify({ ...q, usdcMicro: q.usdcMicro.toString(), outRaw: q.outRaw.toString(), minOutRaw: q.minOutRaw.toString(), uiMultiplier: mult }, null, 2));
+      const pay = payToken(flag("pay-with") ?? "USDC");
+      const q = await quoteBuy({ mint: s.mint, usdcMicro: BigInt(Math.round(usd * 1e6)), uiMultiplier: mult, payToken: pay });
+      if (has("json")) console.log(JSON.stringify({ ...q, usdcMicro: q.usdcMicro.toString(), pay: { ...q.pay, amountRaw: q.pay.amountRaw.toString() }, outRaw: q.outRaw.toString(), minOutRaw: q.minOutRaw.toString(), uiMultiplier: mult }, null, 2));
       else {
         console.log(`${sym}  ${s.mint}`);
-        console.log(`$${usd} USDC → ${q.outUi.toFixed(6)} ${sym}  (fill $${q.fillPrice.toFixed(2)}/token, API token $${s.tokenPrice.toFixed(2)}, mark $${s.markPrice.toFixed(2)})`);
+        console.log(`$${usd} as ${fmtToken(q.pay.amountRaw, pay)}${pay.fixedUsd ? "" : ` at $${q.pay.usdPrice.toFixed(4)}/${pay.symbol}`} → ${q.outUi.toFixed(6)} ${sym}  (fill $${q.fillPrice.toFixed(2)}/token, API token $${s.tokenPrice.toFixed(2)}, mark $${s.markPrice.toFixed(2)})`);
         console.log(`impact ${(q.priceImpact * 100).toFixed(3)}%  slippage ${q.slippageBps} bps  route ${q.route.join(" → ")}  ui multiplier ${mult}`);
       }
       return;

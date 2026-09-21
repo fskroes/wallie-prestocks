@@ -237,3 +237,23 @@ test("/quote sells one line and /health is free", async () => {
     await server.close();
   }
 });
+
+test("a mainnet agent can only buy from a mainnet seller: the offer's chain and USDC mint must match", async () => {
+  const mainnet = await startReportServer({ network: "solana", fetchImpl: apiWith() });
+  const devnet = await startReportServer({ network: "solana-devnet", fetchImpl: apiWith() });
+  const rt = await buyer(1, {}, "solana");
+  try {
+    const ok = await watchPreStocks({ ctx: rt.ctx, serverUrl: mainnet.url, watch: ["SPACEX"], polls: 1 });
+    assert.equal(ok.polls[0].paid.ok, true, ok.polls[0].paid.error ?? "");
+    assert.equal(ok.polls[0].paid.costMicro, 10_000n);
+    // The same agent against a devnet seller signs nothing and pays nothing.
+    const no = await watchPreStocks({ ctx: rt.ctx, serverUrl: devnet.url, watch: ["SPACEX"], polls: 1 });
+    assert.equal(no.polls[0].paid.ok, false);
+    assert.equal(no.polls[0].paid.costMicro, 0n);
+    assert.equal(devnet.served, 0);
+  } finally {
+    rt.stopHeartbeat?.();
+    await mainnet.close();
+    await devnet.close();
+  }
+});

@@ -9,7 +9,7 @@ A Wallie agent that watches the 8 PreStocks tokens, pays a cent per premium repo
 ## Why it is a use of PreStocks
 
 - Data: `https://prestocks.com/api/prestocks` and `/api/stats` are the only price sources. Token price, mark price, supply, valuations, volume, holders.
-- Trading: the executor buys the actual PreStocks Token-2022 mints (`Pre…`) through Jupiter, reading the ScaledUiAmount multiplier from the mint so the fill matches the API's per-token price after the SPACEX split.
+- Trading: the executor buys the actual PreStocks Token-2022 mints (`Pre…`) through Jupiter, paying in USDC or EURC, reading the ScaledUiAmount multiplier from the mint so the fill matches the API's per-token price after the SPACEX split.
 - Exclusivity: the executor refuses any mint that is not a PreStocks mint. No other pre-IPO token is integrated, referenced, or tradeable through this repo.
 
 ## What is different from the other PreStocks entries
@@ -18,7 +18,7 @@ The public entries seen on 2026-09-20 (prestocks-pulse, prestocks-terminal) are 
 
 ## Evidence
 
-- 26 offline tests from pinned 2026-09-20 fixtures of both PreStocks endpoints and Jupiter quote and swap responses.
+- 33 offline tests from pinned 2026-09-20/21 fixtures of both PreStocks endpoints and Jupiter price, quote and swap responses (USDC and EURC).
 - `web/data.json`: a recorded run with live PreStocks data and live Jupiter routes, dry-run buys.
 - Mainnet buy: see the "Mainnet proof" section below once the owner runs it.
 - CLI `quote SPACEX` live on 2026-09-20: $5 → 0.041210 SPACEX at $121.33, Meteora DLMM, impact 2.7%, ui multiplier 5.

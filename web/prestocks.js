@@ -50,13 +50,14 @@
   $("#run-head").innerHTML =
     `mode <b>${esc(live.mode)}</b> · agent <span class="addr">${esc(live.agent)}</span><br>` +
     `watch ${live.watch.map(esc).join(", ")} · buy ${live.policy.symbols.length ? live.policy.symbols.map(esc).join(", ") : "none"} when ≥ ${(live.policy.buyBelowDiscount * 100).toFixed(0)}% below mark<br>` +
-    `rails ${usd(live.policy.maxPerTradeUsd)} per trade · ${usd(live.policy.maxTotalUsd)} total · impact ≤ ${(live.policy.maxPriceImpact * 100).toFixed(0)}% · fill ≤ mark + ${(live.policy.maxFillOverMark * 100).toFixed(0)}% · allowance ${usd(live.policy.allowanceUsd)}`;
+    `rails ${usd(live.policy.maxPerTradeUsd)} per trade · ${usd(live.policy.maxTotalUsd)} total · impact ≤ ${(live.policy.maxPriceImpact * 100).toFixed(0)}% · fill ≤ mark + ${(live.policy.maxFillOverMark * 100).toFixed(0)}% · allowance ${usd(live.policy.allowanceUsd)}${live.payToken && live.payToken !== "USDC" ? ` · paid in ${esc(live.payToken)}` : ""}`;
   $("#timeline").innerHTML = live.polls.map((p) => {
     const alerts = p.alerts.map((a) => `<span class="alert ${alertCls(a.rule)}">${esc(a.rule)}: ${esc(a.detail)}</span>`).join("");
     const buys = p.buys.map((b) => {
       const link = b.signature ? ` <a href="https://solscan.io/tx/${esc(b.signature)}" target="_blank" rel="noopener">${esc(b.signature.slice(0, 16))}… on Solscan</a>` : "";
+      const paid = b.pay && b.pay.symbol !== "USDC" ? ` <span class="q">paid ${(Number(b.pay.amountRaw) / 10 ** b.pay.decimals).toFixed(2)} ${esc(b.pay.symbol)} at ${usd(b.pay.usdPrice, 4)}/${esc(b.pay.symbol)}</span>` : "";
       const q = b.quote ? ` <span class="q">quote ${b.quote.outUi.toFixed(4)} ${esc(b.symbol)} @ ${usd(b.quote.fillPrice)} · impact ${(b.quote.priceImpact * 100).toFixed(2)}% · ${b.quote.route.map(esc).join(" → ")}</span>` : "";
-      return `<div class="buy ${b.allowed ? "yes" : "no"}"><b>${b.allowed ? "✓" : "✗"} buy ${esc(b.symbol)} ${micro(b.usdcMicro)}</b> ${esc(b.reason)}${link}${q}</div>`;
+      return `<div class="buy ${b.allowed ? "yes" : "no"}"><b>${b.allowed ? "✓" : "✗"} buy ${esc(b.symbol)} ${micro(b.usdcMicro)}</b> ${esc(b.reason)}${link}${paid}${q}</div>`;
     }).join("");
     return `<div class="poll"><div class="money"><b>poll ${p.n}</b><br><span class="esc">escrow ${micro(p.quotedMicro)}</span><br><span class="chg">charged ${micro(p.costMicro)}</span><br><span class="ref">refund ${micro(p.refundMicro)}</span></div><div>${p.ok ? alerts || '<span class="alert">no alerts on the watchlist</span>' : `<span class="alert bad">blocked: ${esc(p.reason || "policy")}</span>`}${buys}</div></div>`;
   }).join("");
