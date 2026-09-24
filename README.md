@@ -50,18 +50,19 @@ Paying in EURC: the allowance, the buy policy and the ledger are in USD. A $5 bu
 
 ## The money trail
 
-One run on 2026-09-20 (`web/data.json`, live data, dry-run buys):
+One run on 2026-09-24 (`web/data.json`, live data, real mainnet buy paid in EURC):
 
 ```
-poll 1  paid  escrowed $0.10 → charged $0.01 → refunded $0.09   allowance left $10.49
-  ▼ SPACEX      token    $118.00  mark    $153.86   -23.3%  discount
-  ▲ OPENAI      token  $1,127.29  mark    $996.02   +13.2%  premium
-  ⚠ discount: SPACEX trades -23.3% vs mark
-  ⚠ premium: OPENAI trades +13.2% vs mark
-  ✓ buy SPACEX $5.00: dry run: would buy 0.0412 SPACEX at $121.33 via Meteora DLMM
-poll 2  ...
-  ✗ buy SPACEX $0.00: already bought SPACEX this session
+poll 1  paid  escrowed $0.10 → charged $0.01 → refunded $0.09   allowance left $5.49
+  ▼ SPACEX      token    $119.07  mark    $147.54   -19.3%  discount
+  ▲ OPENAI      token  $1,318.19  mark  $1,023.64   +28.8%  premium
+  ⚠ discount: SPACEX trades -19.3% vs mark
+  ⚠ premium: OPENAI trades +28.8% vs mark
+  ✓ buy SPACEX $5.00: bought 0.0418 SPACEX at $119.53 for 4.395895 EURC via Whirlpool → Meteora DLMM
+    https://solscan.io/tx/J3CrbaLTMiFTcBFqqryeXBGapj5jgbNqtzgNLXuVrZrp6Tih7aVkTM4NXqBSPrXDUR7mzpfNFoQsns1cV7XvfZF
 ```
+
+The pinned `web/data.json` before this was a live-dry-run from 2026-09-20 (real routes and prices, nothing signed); the run above replaced it with the signed mainnet record.
 
 The ledger after the run has one `topup`, two `payment` rows to the report server with `scheme: upto`, deposit and refund columns, and, on a mainnet run, a `payment` row to `lite-api.jup.ag` whose `txHash` is the swap signature. A refused buy is a `blocked` row with the rule that refused it.
 

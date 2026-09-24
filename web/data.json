@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-20T20:02:57.178Z",
-  "mode": "live-dry-run",
-  "agent": "6ESczEwR3AnssWTYiCQLTNpq4nq3TKTwLWi6figvNPu6",
+  "generatedAt": "2026-09-24T20:41:49.159Z",
+  "mode": "mainnet",
+  "agent": "FhzduRUsSK4SKZEekUZmVo6Xp95zyyhniu1hZ3ASoUba",
   "watch": [
     "SPACEX",
     "OPENAI",
@@ -18,6 +18,7 @@
     "buyBelowDiscount": 0.03,
     "allowanceUsd": 10.5
   },
+  "payToken": "EURC",
   "perReportMicro": "10000",
   "ceilingMicro": "100000",
   "polls": [
@@ -28,128 +29,128 @@
       "costMicro": "10000",
       "refundMicro": "90000",
       "report": {
-        "fetchedAt": "2026-09-20T20:02:54.878Z",
+        "fetchedAt": "2026-09-24T20:41:48.110Z",
         "band": 0.02,
         "lines": [
           {
             "symbol": "ANDURIL",
             "name": "Anduril PreStocks",
             "mint": "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB",
-            "tokenPrice": 158.34197981826614,
-            "markPrice": 154.62057601,
-            "premium": 0.024067972738799348,
-            "spreadUsd": 3.721403808266132,
+            "tokenPrice": 166.80535077712335,
+            "markPrice": 153.84326746,
+            "premium": 0.08425512231462173,
+            "spreadUsd": 12.962083317123358,
             "signal": "premium",
-            "supply": 11805.856730691,
-            "markValuation": 136792677833,
-            "volumeUsd": 225716585.12323517,
-            "holders": 13746
+            "supply": 11805.817985464,
+            "markValuation": 136104993692,
+            "volumeUsd": 226144362.29606423,
+            "holders": 15433
           },
           {
             "symbol": "ANTHROPIC",
             "name": "Anthropic PreStocks",
             "mint": "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw",
-            "tokenPrice": 1036.914718038109,
-            "markPrice": 1035.17371984,
-            "premium": 0.0016818415737775982,
-            "spreadUsd": 1.740998198108855,
+            "tokenPrice": 1041.1931695383703,
+            "markPrice": 1040.80802291,
+            "premium": 0.00037004579124344517,
+            "spreadUsd": 0.38514662837019387,
             "signal": "fair",
-            "supply": 7381.880317863,
-            "markValuation": 1695968896361,
-            "volumeUsd": 375086805.51252943,
-            "holders": 68516
+            "supply": 7381.79983077,
+            "markValuation": 1705201260944,
+            "volumeUsd": 387645540.29794425,
+            "holders": 83197
           },
           {
             "symbol": "FIGUREAI",
             "name": "Figure AI PreStocks",
             "mint": "PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd",
-            "tokenPrice": 177.6467421932519,
-            "markPrice": 181.01167107,
-            "premium": -0.018589568599954198,
-            "spreadUsd": -3.3649288767481096,
-            "signal": "fair",
-            "supply": 3012.910074075,
-            "markValuation": 39465428720,
-            "volumeUsd": 4386872.976355148,
-            "holders": 1475
+            "tokenPrice": 171.56772550864193,
+            "markPrice": 180.60286281,
+            "premium": -0.050027652722555827,
+            "spreadUsd": -9.035137301358077,
+            "signal": "discount",
+            "supply": 3012.857155916,
+            "markValuation": 39376297488,
+            "volumeUsd": 4580148.201290417,
+            "holders": 2490
           },
           {
             "symbol": "KALSHI",
             "name": "Kalshi PreStocks",
             "mint": "PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua",
-            "tokenPrice": 885.9787583322208,
-            "markPrice": 895.40359309,
-            "premium": -0.010525795105707059,
-            "spreadUsd": -9.424834757779195,
-            "signal": "fair",
-            "supply": 904.89560078,
-            "markValuation": 32567666977,
-            "volumeUsd": 172408225.36037904,
-            "holders": 6299
+            "tokenPrice": 860.0642488444762,
+            "markPrice": 882.06652608,
+            "premium": -0.02494401112045863,
+            "spreadUsd": -22.00227723552382,
+            "signal": "discount",
+            "supply": 904.865204987,
+            "markValuation": 32082448474,
+            "volumeUsd": 175047775.2150348,
+            "holders": 10806
           },
           {
             "symbol": "NEURALINK",
             "name": "Neuralink PreStocks",
             "mint": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
-            "tokenPrice": 425.3339435424123,
-            "markPrice": 336.441396,
-            "premium": 0.2642140610497654,
-            "spreadUsd": 88.89254754241233,
+            "tokenPrice": 444.1025167912102,
+            "markPrice": 336.39372855,
+            "premium": 0.3201866714503889,
+            "spreadUsd": 107.70878824121019,
             "signal": "premium",
-            "supply": 2595.332545891,
-            "markValuation": 64090420387,
-            "volumeUsd": 130150352.33942851,
-            "holders": 13233
+            "supply": 2595.273807132,
+            "markValuation": 64081339973,
+            "volumeUsd": 131243986.73324497,
+            "holders": 18127
           },
           {
             "symbol": "OPENAI",
             "name": "OpenAI PreStocks",
             "mint": "PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF",
-            "tokenPrice": 1127.2924277872964,
-            "markPrice": 996.0160290315541,
-            "premium": 0.13180149207376202,
-            "spreadUsd": 131.27639875574232,
+            "tokenPrice": 1318.191854608294,
+            "markPrice": 1023.6384111346031,
+            "premium": 0.2877514562463588,
+            "spreadUsd": 294.553443473691,
             "signal": "premium",
-            "supply": 2826.4471835924674,
-            "markValuation": 1233994435509,
-            "volumeUsd": 378688796.9517165,
-            "holders": 60320
+            "supply": 2826.338134404679,
+            "markValuation": 1268216641595,
+            "volumeUsd": 394065666.8575039,
+            "holders": 77485
           },
           {
             "symbol": "POLYMARKET",
             "name": "Polymarket PreStocks",
             "mint": "Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP",
-            "tokenPrice": 144.48500756308124,
-            "markPrice": 143.84743065,
-            "premium": 0.004432313529690646,
-            "spreadUsd": 0.637576913081233,
+            "tokenPrice": 143.64281525117536,
+            "markPrice": 144.36488931,
+            "premium": -0.0050017290372736944,
+            "spreadUsd": -0.7220740588246315,
             "signal": "fair",
-            "supply": 4817.084336996,
-            "markValuation": 14187062670,
-            "volumeUsd": 105589264.06426308,
-            "holders": 30111
+            "supply": 4816.898364117,
+            "markValuation": 15030149787,
+            "volumeUsd": 107606197.43728581,
+            "holders": 33605
           },
           {
             "symbol": "SPACEX",
             "name": "SpaceX PreStocks",
             "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
-            "tokenPrice": 118.00142716768707,
-            "markPrice": 153.86015616880977,
-            "premium": -0.23306052648081155,
-            "spreadUsd": -35.8587290011227,
+            "tokenPrice": 119.06680256345143,
+            "markPrice": 147.53718019543462,
+            "premium": -0.19297086737234637,
+            "spreadUsd": -28.470377631983183,
             "signal": "discount",
-            "supply": 43712.533765345,
-            "markValuation": 2017277603102,
-            "volumeUsd": 333783378.6738693,
-            "holders": 11778
+            "supply": 43712.52932,
+            "markValuation": 1934376362562,
+            "volumeUsd": 333810869.63423586,
+            "holders": 11702
           }
         ],
         "ranked": [
           "SPACEX",
           "FIGUREAI",
           "KALSHI",
-          "ANTHROPIC",
           "POLYMARKET",
+          "ANTHROPIC",
           "ANDURIL",
           "OPENAI",
           "NEURALINK"
@@ -158,43 +159,43 @@
           "symbol": "SPACEX",
           "name": "SpaceX PreStocks",
           "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
-          "tokenPrice": 118.00142716768707,
-          "markPrice": 153.86015616880977,
-          "premium": -0.23306052648081155,
-          "spreadUsd": -35.8587290011227,
+          "tokenPrice": 119.06680256345143,
+          "markPrice": 147.53718019543462,
+          "premium": -0.19297086737234637,
+          "spreadUsd": -28.470377631983183,
           "signal": "discount",
-          "supply": 43712.533765345,
-          "markValuation": 2017277603102,
-          "volumeUsd": 333783378.6738693,
-          "holders": 11778
+          "supply": 43712.52932,
+          "markValuation": 1934376362562,
+          "volumeUsd": 333810869.63423586,
+          "holders": 11702
         },
         "dearest": {
           "symbol": "NEURALINK",
           "name": "Neuralink PreStocks",
           "mint": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
-          "tokenPrice": 425.3339435424123,
-          "markPrice": 336.441396,
-          "premium": 0.2642140610497654,
-          "spreadUsd": 88.89254754241233,
+          "tokenPrice": 444.1025167912102,
+          "markPrice": 336.39372855,
+          "premium": 0.3201866714503889,
+          "spreadUsd": 107.70878824121019,
           "signal": "premium",
-          "supply": 2595.332545891,
-          "markValuation": 64090420387,
-          "volumeUsd": 130150352.33942851,
-          "holders": 13233
+          "supply": 2595.273807132,
+          "markValuation": 64081339973,
+          "volumeUsd": 131243986.73324497,
+          "holders": 18127
         }
       },
       "alerts": [
         {
           "rule": "discount",
           "symbol": "SPACEX",
-          "detail": "SPACEX trades -23.3% vs mark (token $118.00, mark $153.86)",
-          "at": "2026-09-20T20:02:54.878Z"
+          "detail": "SPACEX trades -19.3% vs mark (token $119.07, mark $147.54)",
+          "at": "2026-09-24T20:41:48.110Z"
         },
         {
           "rule": "premium",
           "symbol": "OPENAI",
-          "detail": "OPENAI trades +13.2% vs mark (token $1127.29, mark $996.02)",
-          "at": "2026-09-20T20:02:54.878Z"
+          "detail": "OPENAI trades +28.8% vs mark (token $1318.19, mark $1023.64)",
+          "at": "2026-09-24T20:41:48.110Z"
         }
       ],
       "buys": [
@@ -202,217 +203,39 @@
           "symbol": "SPACEX",
           "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
           "usdcMicro": "5000000",
+          "pay": {
+            "symbol": "EURC",
+            "mint": "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr",
+            "amountRaw": "4395895",
+            "decimals": 6,
+            "usdPrice": 1.1374248457050133
+          },
           "allowed": true,
-          "reason": "dry run: would buy 0.0412 SPACEX at $121.33 via Meteora DLMM",
-          "dryRun": true,
+          "reason": "bought 0.0418 SPACEX at $119.53 for 4.395895 EURC via Whirlpool → Meteora DLMM",
+          "signature": "J3CrbaLTMiFTcBFqqryeXBGapj5jgbNqtzgNLXuVrZrp6Tih7aVkTM4NXqBSPrXDUR7mzpfNFoQsns1cV7XvfZF",
+          "slot": 450139894,
+          "dryRun": false,
           "quote": {
-            "outUi": 0.04121013,
-            "fillPrice": 121.32939158405956,
-            "priceImpact": 0.02717049412926621,
+            "outUi": 0.04183104,
+            "fillPrice": 119.52846498676581,
+            "priceImpact": 0.035325354955364,
             "route": [
+              "Whirlpool",
               "Meteora DLMM"
             ]
           }
         }
       ],
       "spentMicro": "10000",
-      "boughtMicro": "0"
-    },
-    {
-      "n": 2,
-      "ok": true,
-      "quotedMicro": "100000",
-      "costMicro": "10000",
-      "refundMicro": "90000",
-      "report": {
-        "fetchedAt": "2026-09-20T20:02:54.878Z",
-        "band": 0.02,
-        "lines": [
-          {
-            "symbol": "ANDURIL",
-            "name": "Anduril PreStocks",
-            "mint": "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB",
-            "tokenPrice": 158.34197981826614,
-            "markPrice": 154.62057601,
-            "premium": 0.024067972738799348,
-            "spreadUsd": 3.721403808266132,
-            "signal": "premium",
-            "supply": 11805.856730691,
-            "markValuation": 136792677833,
-            "volumeUsd": 225716585.12323517,
-            "holders": 13746
-          },
-          {
-            "symbol": "ANTHROPIC",
-            "name": "Anthropic PreStocks",
-            "mint": "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw",
-            "tokenPrice": 1036.914718038109,
-            "markPrice": 1035.17371984,
-            "premium": 0.0016818415737775982,
-            "spreadUsd": 1.740998198108855,
-            "signal": "fair",
-            "supply": 7381.880317863,
-            "markValuation": 1695968896361,
-            "volumeUsd": 375086805.51252943,
-            "holders": 68516
-          },
-          {
-            "symbol": "FIGUREAI",
-            "name": "Figure AI PreStocks",
-            "mint": "PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd",
-            "tokenPrice": 177.6467421932519,
-            "markPrice": 181.01167107,
-            "premium": -0.018589568599954198,
-            "spreadUsd": -3.3649288767481096,
-            "signal": "fair",
-            "supply": 3012.910074075,
-            "markValuation": 39465428720,
-            "volumeUsd": 4386872.976355148,
-            "holders": 1475
-          },
-          {
-            "symbol": "KALSHI",
-            "name": "Kalshi PreStocks",
-            "mint": "PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua",
-            "tokenPrice": 885.9787583322208,
-            "markPrice": 895.40359309,
-            "premium": -0.010525795105707059,
-            "spreadUsd": -9.424834757779195,
-            "signal": "fair",
-            "supply": 904.89560078,
-            "markValuation": 32567666977,
-            "volumeUsd": 172408225.36037904,
-            "holders": 6299
-          },
-          {
-            "symbol": "NEURALINK",
-            "name": "Neuralink PreStocks",
-            "mint": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
-            "tokenPrice": 425.3339435424123,
-            "markPrice": 336.441396,
-            "premium": 0.2642140610497654,
-            "spreadUsd": 88.89254754241233,
-            "signal": "premium",
-            "supply": 2595.332545891,
-            "markValuation": 64090420387,
-            "volumeUsd": 130150352.33942851,
-            "holders": 13233
-          },
-          {
-            "symbol": "OPENAI",
-            "name": "OpenAI PreStocks",
-            "mint": "PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF",
-            "tokenPrice": 1127.2924277872964,
-            "markPrice": 996.0160290315541,
-            "premium": 0.13180149207376202,
-            "spreadUsd": 131.27639875574232,
-            "signal": "premium",
-            "supply": 2826.4471835924674,
-            "markValuation": 1233994435509,
-            "volumeUsd": 378688796.9517165,
-            "holders": 60320
-          },
-          {
-            "symbol": "POLYMARKET",
-            "name": "Polymarket PreStocks",
-            "mint": "Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP",
-            "tokenPrice": 144.48500756308124,
-            "markPrice": 143.84743065,
-            "premium": 0.004432313529690646,
-            "spreadUsd": 0.637576913081233,
-            "signal": "fair",
-            "supply": 4817.084336996,
-            "markValuation": 14187062670,
-            "volumeUsd": 105589264.06426308,
-            "holders": 30111
-          },
-          {
-            "symbol": "SPACEX",
-            "name": "SpaceX PreStocks",
-            "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
-            "tokenPrice": 118.00142716768707,
-            "markPrice": 153.86015616880977,
-            "premium": -0.23306052648081155,
-            "spreadUsd": -35.8587290011227,
-            "signal": "discount",
-            "supply": 43712.533765345,
-            "markValuation": 2017277603102,
-            "volumeUsd": 333783378.6738693,
-            "holders": 11778
-          }
-        ],
-        "ranked": [
-          "SPACEX",
-          "FIGUREAI",
-          "KALSHI",
-          "ANTHROPIC",
-          "POLYMARKET",
-          "ANDURIL",
-          "OPENAI",
-          "NEURALINK"
-        ],
-        "cheapest": {
-          "symbol": "SPACEX",
-          "name": "SpaceX PreStocks",
-          "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
-          "tokenPrice": 118.00142716768707,
-          "markPrice": 153.86015616880977,
-          "premium": -0.23306052648081155,
-          "spreadUsd": -35.8587290011227,
-          "signal": "discount",
-          "supply": 43712.533765345,
-          "markValuation": 2017277603102,
-          "volumeUsd": 333783378.6738693,
-          "holders": 11778
-        },
-        "dearest": {
-          "symbol": "NEURALINK",
-          "name": "Neuralink PreStocks",
-          "mint": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
-          "tokenPrice": 425.3339435424123,
-          "markPrice": 336.441396,
-          "premium": 0.2642140610497654,
-          "spreadUsd": 88.89254754241233,
-          "signal": "premium",
-          "supply": 2595.332545891,
-          "markValuation": 64090420387,
-          "volumeUsd": 130150352.33942851,
-          "holders": 13233
-        }
-      },
-      "alerts": [
-        {
-          "rule": "discount",
-          "symbol": "SPACEX",
-          "detail": "SPACEX trades -23.3% vs mark (token $118.00, mark $153.86)",
-          "at": "2026-09-20T20:02:54.878Z"
-        },
-        {
-          "rule": "premium",
-          "symbol": "OPENAI",
-          "detail": "OPENAI trades +13.2% vs mark (token $1127.29, mark $996.02)",
-          "at": "2026-09-20T20:02:54.878Z"
-        }
-      ],
-      "buys": [
-        {
-          "symbol": "SPACEX",
-          "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
-          "usdcMicro": "0",
-          "allowed": false,
-          "reason": "already bought SPACEX this session"
-        }
-      ],
-      "spentMicro": "20000",
-      "boughtMicro": "0"
+      "boughtMicro": "5000000"
     }
   ],
-  "spentMicro": "20000",
-  "boughtMicro": "0",
+  "spentMicro": "10000",
+  "boughtMicro": "5000000",
   "ledger": [
     {
       "t": "topup",
-      "at": "2026-09-20T20:02:54.485Z",
+      "at": "2026-09-24T20:41:42.573Z",
       "agent": "prestocks-agent",
       "amountMicro": "10500000",
       "source": "human::sdk",
@@ -420,31 +243,27 @@
     },
     {
       "t": "payment",
-      "at": "2026-09-20T20:02:54.883Z",
+      "at": "2026-09-24T20:41:48.115Z",
       "agent": "prestocks-agent",
-      "url": "http://localhost:56789/report",
-      "host": "localhost:56789",
+      "url": "http://localhost:54342/report",
+      "host": "localhost:54342",
       "amountMicro": "10000",
-      "txHash": "claim-FxGoyaEkLvSw6B6DT3RFkHdZbikFaHaN6vGmYczdYkE9",
+      "txHash": "claim-6Z6aWuPKhaRcfWi1dRLBpK5HBNirRxjrLPUCq7n1hLo8",
       "balanceAfterMicro": "10490000",
       "scheme": "upto",
       "depositMicro": "100000",
       "refundMicro": "90000",
-      "channelId": "FxGoyaEkLvSw6B6DT3RFkHdZbikFaHaN6vGmYczdYkE9"
+      "channelId": "6Z6aWuPKhaRcfWi1dRLBpK5HBNirRxjrLPUCq7n1hLo8"
     },
     {
       "t": "payment",
-      "at": "2026-09-20T20:02:57.152Z",
+      "at": "2026-09-24T20:41:49.135Z",
       "agent": "prestocks-agent",
-      "url": "http://localhost:56789/report",
-      "host": "localhost:56789",
-      "amountMicro": "10000",
-      "txHash": "claim-4RDBiqm4BntUbXQVpzafYps3seSSN9Cb25T4zoxxEx5G",
-      "balanceAfterMicro": "10480000",
-      "scheme": "upto",
-      "depositMicro": "100000",
-      "refundMicro": "90000",
-      "channelId": "4RDBiqm4BntUbXQVpzafYps3seSSN9Cb25T4zoxxEx5G"
+      "url": "https://lite-api.jup.ag/swap/v1/swap",
+      "host": "lite-api.jup.ag",
+      "amountMicro": "5000000",
+      "txHash": "J3CrbaLTMiFTcBFqqryeXBGapj5jgbNqtzgNLXuVrZrp6Tih7aVkTM4NXqBSPrXDUR7mzpfNFoQsns1cV7XvfZF",
+      "balanceAfterMicro": "10490000"
     }
   ]
 }
