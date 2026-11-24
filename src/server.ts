@@ -1,19 +1,3 @@
-/**
- * The paid report server: an x402 `upto` seller that meters premium reports.
- *
- * An agent opens one channel per request with a ceiling, the server charges
- * per report actually produced, and the rest is refunded. A failed fetch
- * charges nothing.
- *
- *   GET /report[?band=0.02]      the premium report for all 8 PreStocks
- *   GET /quote?symbol=X          one line, for an agent that watches one name
- *   GET /health                  free
- *
- * Same shape as wallie-dbc's report server, so a Wallie buyer that knows one
- * knows the other. `fetchImpl` is injectable so tests and the offline demo run
- * from fixtures; `operator` is in-memory for the demo and
- * `createSolanaUptoOperator` for real USDC settlement.
- */
 import http from "node:http";
 import { Keypair } from "@solana/web3.js";
 import {
@@ -30,14 +14,11 @@ import { buildReport, type PremiumReport } from "./report.ts";
 
 export interface ReportServerOptions {
   network?: string;
-  /** Micro-USD charged per report produced. Default 10_000 = $0.01. */
   perReportMicro?: bigint;
-  /** Ceiling a buyer must deposit per request. Default 100_000 = $0.10. */
   ceilingMicro?: bigint;
   payTo?: string;
   operator?: UptoOperator;
   fetchImpl?: FetchLike;
-  /** Cache the upstream API for this long so a polling agent does not hammer PreStocks. Default 15 s. */
   cacheMs?: number;
   port?: number;
   host?: string;
@@ -93,7 +74,6 @@ export async function startReportServer(o: ReportServerOptions = {}): Promise<Re
         stats = await fetchStats(fetchImpl);
         statsAt = now;
       } catch {
-        // Volume and holders are decoration. The report stands without them.
       }
     }
     const stocks = await fetchPreStocks(fetchImpl);
@@ -140,7 +120,6 @@ export async function startReportServer(o: ReportServerOptions = {}): Promise<Re
         }
         return json(404, { error: "not found" });
       } catch (e) {
-        // Nothing produced, nothing charged: the channel settles at zero and refunds in full.
         return json(502, { error: (e as Error).message });
       }
     },

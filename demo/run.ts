@@ -1,31 +1,3 @@
-/**
- * The demo, end to end:
- *
- *   1. start the paid report server (x402 upto, in-memory settlement, live PreStocks API)
- *   2. a Wallie agent with an allowance polls the premium report
- *   3. every discount alert on a watched symbol goes through the buy policy
- *   4. the agent prints the report, the alerts, every buy decision, and the money trail
- *
- * Default: reports are live from prestocks.com, buys are DRY RUNS against live
- * Jupiter quotes (real routes, real prices, nothing signed or sent). The report
- * payments settle in-memory, exactly as the Wallie MCP demo does it.
- *
- *   node demo/run.ts [--polls 3] [--watch SPACEX,OPENAI] [--buy SPACEX] [--usd 5] [--out web/data.json]
- *
- * Real mainnet buys need all of: --i-mean-mainnet, --key <file>, a funded wallet
- * (USDC or EURC, plus a little SOL), and --rpc for anything better than the public
- * endpoint. The key file is a 64-number JSON array, a base58 secret, or
- * `private=<base58>` lines (an `address=` line is checked against the key).
- * `--pay-with EURC` spends EURC at Jupiter's live price; the allowance and the
- * ledger stay in USD. The script prints the policy and the wallet and waits 5 s.
- *
- *   node demo/run.ts --i-mean-mainnet --key .keys/agent.json --buy SPACEX --usd 5 --polls 1 --pay-with EURC
- *
- * Add --preflight to stop right after the wallet check: the key, the balances and
- * the policy are printed and nothing is polled, signed or sent.
- *
- * Offline (no network at all): --offline serves the 2026-09-20 fixtures.
- */
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -105,8 +77,6 @@ async function main(): Promise<void> {
   }
   const connection = new Connection(RPC, "confirmed");
 
-  // The buyer refuses an offer from another chain, so the seller must sit on the
-  // agent's network. Settlement stays in-memory either way (pinnedOperator).
   const server = await startReportServer({ network: MAINNET ? "solana" : "solana-devnet", fetchImpl: OFFLINE ? fixtureFetch({ prestocks: fixture("prestocks-2026-09-20.json"), stats: fixture("stats-2026-09-20.json") }) : undefined });
   line(`  server    ${server.url}  ${fmtUsd(server.perReportMicro)} per report, ${fmtUsd(server.ceilingMicro)} ceiling per call`);
 
@@ -117,8 +87,6 @@ async function main(): Promise<void> {
     privateKey: payer ? JSON.stringify(Array.from(payer.secretKey)) : solanaKeyJson(),
     network: MAINNET ? "solana" : "solana-devnet",
     rpcUrl: MAINNET ? RPC : "http://127.0.0.1:1",
-    // The allowance's own on-chain check reads USDC. When the wallet pays in
-    // EURC that check would refuse every buy, so the balance is checked below instead.
     checkOnChainBalance: MAINNET && PAY.symbol === "USDC",
     preferScheme: "upto",
   });

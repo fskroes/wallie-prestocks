@@ -1,51 +1,21 @@
-/**
- * The Wallie PreStocks agent. Two layers, one allowance:
- *
- *   watch   pay for premium reports over x402 `upto`, raise alerts on rules
- *   buy     when a rule fires, buy the token on Jupiter, inside a buy policy
- *
- * The report spend and the buy spend draw from the same Wallie allowance, so
- * the total the agent can move is one number the operator set. The buy policy
- * adds four limits on top of the allowance rails:
- *
- *   maxPerTradeUsd      one swap never exceeds this
- *   maxTotalUsd         the sum of all fills in this session never exceeds this
- *   maxPriceImpact      Jupiter's quoted impact must be below this
- *   maxFillOverMark     the fill price must be at most (1 + this) × mark
- *
- * A buy is a real, irreversible swap. `execute` is injectable so tests and
- * the offline demo show the policy deciding without touching mainnet. The
- * live executor is in src/jupiter.ts and the demo only wires it in with
- * `--i-mean-mainnet`.
- *
- * Alert rules (all from the report, all explainable in one line):
- *   discount    a watched symbol trades at or below −minDiscount of mark
- *   premium     a watched symbol trades at or above +maxPremium of mark
- *   crossed     a watched symbol's sign flipped since the last poll
- */
 import { payingFetch, type PaidResult, type PayContext } from "allowance-kit";
 import type { Line, PremiumReport } from "./report.ts";
 import { fmtToken, type Quote } from "./jupiter.ts";
 
 export interface WatchRules {
-  /** Alert when premium ≤ −minDiscount. 0.03 = 3% below mark. */
   minDiscount: number;
-  /** Alert when premium ≥ maxPremium. */
   maxPremium: number;
 }
 
 export const DEFAULT_RULES: WatchRules = { minDiscount: 0.03, maxPremium: 0.1 };
 
 export interface BuyPolicy {
-  /** Symbols the agent may buy. Empty means none: watch only. */
   symbols: string[];
-  /** Buy when premium ≤ −buyBelowDiscount. Defaults to rules.minDiscount. */
   buyBelowDiscount?: number;
   maxPerTradeUsd: number;
   maxTotalUsd: number;
   maxPriceImpact: number;
   maxFillOverMark: number;
-  /** At most one buy per symbol per session. Default true. */
   oncePerSymbol?: boolean;
 }
 
@@ -60,18 +30,14 @@ export interface Alert {
 export interface BuyDecision {
   symbol: string;
   mint: string;
-  /** Micro-USD the policy approved and the ledger records. */
   usdcMicro: bigint;
-  /** What the wallet actually spent: USDC or EURC, base units, and the USD price used. */
   pay?: Quote["pay"];
-  /** Why it did or did not go ahead, in one line. */
   reason: string;
   allowed: boolean;
   quote?: Quote;
   signature?: string;
   slot?: number;
   dryRun?: boolean;
-  /** The ledger row id when the fill was recorded against the allowance. */
   recorded?: boolean;
 }
 
@@ -82,7 +48,6 @@ export interface Poll {
   alerts: Alert[];
   buys: BuyDecision[];
   spentMicro: bigint;
-  /** USDC moved into PreStocks so far, micro. */
   boughtMicro: bigint;
 }
 
@@ -122,11 +87,6 @@ export function evaluate(r: PremiumReport, prev: PremiumReport | undefined, watc
 
 const usd = (micro: bigint) => `$${(Number(micro) / 1e6).toFixed(2)}`;
 
-/**
- * Decide and, if allowed, execute one buy for a line that fired `discount`.
- * Every refusal is a returned decision, never a throw, so the poll record
- * shows why nothing happened.
- */
 export async function decideBuy(o: {
   ctx: PayContext;
   serverUrl: string;
@@ -149,9 +109,6 @@ export async function decideBuy(o: {
   if (room <= 0n) return { ...base, usdcMicro: 0n, reason: `buy total ${usd(o.boughtMicro)} has reached the cap ${usd(total)}` };
   const usdcMicro = room < perTrade ? room : perTrade;
 
-  // The allowance rails see a buy as a payment to Jupiter: host allowlist,
-  // per-call cap, velocity, budget, approval threshold, all apply. The URL is
-  // the swap endpoint, so the ledger reads plainly.
   const url = "https://lite-api.jup.ag/swap/v1/swap";
   const auth = await o.ctx.authorize(usdcMicro, url, "exact");
   if (!auth.allowed) {
@@ -177,8 +134,6 @@ export async function decideBuy(o: {
     return { ...base, usdcMicro, quote, reason: `fill $${quote.fillPrice.toFixed(2)} is above ${usd(BigInt(Math.round(ceiling * 1e6)))} (mark + ${(policy.maxFillOverMark * 100).toFixed(1)}%)` };
   }
 
-  // The ledger is in USD. When the wallet pays in EURC the row still says $5.00;
-  // the decision carries the EURC amount so the page can show both.
   const spent = quote.pay.symbol === "USDC" ? "" : ` for ${fmtToken(quote.pay.amountRaw, quote.pay)}`;
   try {
     const r = await o.executor.swap(quote);

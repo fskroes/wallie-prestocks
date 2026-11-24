@@ -21,10 +21,8 @@ export const QUOTE_SPACEX_EURC = loadJson("quote-spacex-5usd-eurc.json");
 export const PRICE_EURC = loadJson("price-eurc-2026-09-21.json");
 export const SWAP_SPACEX = loadJson("swap-spacex-5usd.json");
 
-/** The payer the recorded Jupiter swap fixture was built for (seed = 32 × 0x07). */
 export const FIXTURE_PAYER = Keypair.fromSeed(Buffer.alloc(32, 7));
 
-/** A throwaway 64-byte Solana secret, JSON-array form. Never funded: every open is offline. */
 export function solanaKeyJson(): string {
   const { privateKey } = crypto.generateKeyPairSync("ed25519");
   const pkcs8 = privateKey.export({ format: "der", type: "pkcs8" }) as Buffer;
@@ -44,21 +42,16 @@ export async function buyer(usd: number, policy: Record<string, unknown> = {}, n
     checkOnChainBalance: false,
     preferScheme: "upto",
   });
-  // The default Wallie policy is a $5 lifetime budget with a $2 / 12 s velocity window. Buy tests
-  // fund more, so lift the budget to what was funded and open the window; each test then narrows
-  // the one rail it is about.
   rt.policyStore.save({ allowHostSuffixes: ["localhost", "lite-api.jup.ag"], totalBudgetUsd: usd, windowLimitUsd: usd, ...policy });
   topUp(rt, usd);
   return rt;
 }
 
-/** The fixture API, with a per-symbol override so a test can move one price. */
 export function apiWith(overrides: Record<string, Partial<PreStockRaw>> = {}) {
   const rows = PRESTOCKS.map((r) => ({ ...r, ...(overrides[r.symbol] ?? {}) }));
   return fixtureFetch({ prestocks: rows, stats: STATS });
 }
 
-/** A recorded Jupiter: quotes from the fixture, swaps land with a fake signature unless `fail`. */
 export function recordedExecutor(opts: { dryRun?: boolean; fail?: string; impact?: number } = {}): Executor & { swaps: Quote[] } {
   const http = replayHttp({ "GET /quote": QUOTE_SPACEX, "POST /swap": SWAP_SPACEX });
   const swaps: Quote[] = [];
@@ -66,11 +59,7 @@ export function recordedExecutor(opts: { dryRun?: boolean; fail?: string; impact
     swaps,
     quote: async (mint, usdcMicro) => {
       const raw = QUOTE_SPACEX as { outputMint: string };
-      // SPACEX ran a 5x ScaledUiAmount multiplier on 2026-09-20; the live executor reads it off the mint.
-      // The fixture is one recorded $5 quote. Quote at that amount (quoteBuy checks the in-amount
-      // against the recording), then scale to what the policy asked for.
       const q = await quoteBuy({ mint: raw.outputMint, usdcMicro: 5_000_000n, http, uiMultiplier: 5 });
-      // Tests ask for other mints; the fixture is one route. Re-label so the policy sees the symbol it asked for.
       const scaled = { ...q, mint, usdcMicro, priceImpact: opts.impact ?? q.priceImpact };
       if (usdcMicro !== q.usdcMicro) {
         const k = Number(usdcMicro) / Number(q.usdcMicro);

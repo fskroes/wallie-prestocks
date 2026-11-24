@@ -1,16 +1,3 @@
-/**
- * The premium report: one line per PreStock that says whether the token is
- * cheap or dear against its mark, and by how much.
- *
- *   premium      tokenPrice / markPrice − 1
- *   discount     the same number, sign flipped, when negative
- *   signal       "discount" | "fair" | "premium" against a band
- *   spreadUsd    tokenPrice − markPrice, per token
- *
- * Pure. Every input comes from `fetchPreStocks`; the executable price on
- * Jupiter is a separate figure the buyer checks at trade time (src/jupiter.ts),
- * because the API's tokenPrice is an index, not a fill.
- */
 import type { PreStock, Stats } from "./prestocks.ts";
 import { latestStats } from "./prestocks.ts";
 
@@ -33,10 +20,8 @@ export interface Line {
 
 export interface PremiumReport {
   fetchedAt: string;
-  /** The band that separates "fair" from a signal, as a fraction (0.02 = 2%). */
   band: number;
   lines: Line[];
-  /** Symbols sorted from deepest discount to highest premium. */
   ranked: string[];
   cheapest?: Line;
   dearest?: Line;
