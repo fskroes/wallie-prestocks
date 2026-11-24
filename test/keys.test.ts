@@ -34,10 +34,8 @@ test("parseKeyFile reads a 64-number JSON array, a bare base58 secret, a 32-byte
   assert.equal(kv.form, "key=value");
   assert.equal(kv.claimedAddress, addr);
   assert.equal(kv.keypair.publicKey.toBase58(), addr);
-  // Quotes, CRLF, comments and other spellings of the key names are fine.
   const messy = parseKeyFile(`# my wallet\r\nPublicKey = "${addr}"\r\nsecret_key='${secret58}'\r\n`);
   assert.equal(messy.keypair.publicKey.toBase58(), addr);
-  // The label only has to contain "private" or "secret": a wallet export's own naming works.
   const exported = parseKeyFile(`address=${addr}\nprivate_key_base58=${secret58}\n`);
   assert.equal(exported.claimedAddress, addr);
   assert.equal(exported.keypair.publicKey.toBase58(), addr);

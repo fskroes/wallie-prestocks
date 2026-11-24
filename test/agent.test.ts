@@ -84,7 +84,6 @@ test("buy: the discount alert on SPACEX becomes one $5 buy, recorded against the
     assert.match(b2.reason, /already bought SPACEX/);
     assert.equal(ex.swaps.length, 1);
     assert.equal(res.boughtMicro, 5_000_000n);
-    // $0.02 of reports + $5.00 of SPACEX, one ledger.
     assert.equal(before - allowanceRemaining(rt), 5_020_000n);
     const rows = rt.ledger.read().filter((e) => e.t === "payment");
     assert.equal(rows.length, 3);
@@ -166,7 +165,6 @@ test("buy guards: price impact, fill over mark, quote failure, swap failure all 
     let r = await run(recordedExecutor({ impact: 0.2 }));
     assert.match(r.polls[0].buys[0].reason, /price impact 20.00% is above 5.00%/);
 
-    // The recorded SPACEX fill is $121/token against a $151 mark. Push the fill over mark + 10%.
     const dear = recordedExecutor();
     const q0 = dear.quote;
     dear.quote = async (m, u) => ({ ...(await q0(m, u)), fillPrice: 170 });
@@ -246,7 +244,6 @@ test("a mainnet agent can only buy from a mainnet seller: the offer's chain and 
     const ok = await watchPreStocks({ ctx: rt.ctx, serverUrl: mainnet.url, watch: ["SPACEX"], polls: 1 });
     assert.equal(ok.polls[0].paid.ok, true, ok.polls[0].paid.error ?? "");
     assert.equal(ok.polls[0].paid.costMicro, 10_000n);
-    // The same agent against a devnet seller signs nothing and pays nothing.
     const no = await watchPreStocks({ ctx: rt.ctx, serverUrl: devnet.url, watch: ["SPACEX"], polls: 1 });
     assert.equal(no.polls[0].paid.ok, false);
     assert.equal(no.polls[0].paid.costMicro, 0n);

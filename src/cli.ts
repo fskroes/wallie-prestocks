@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/**
- * wallie-prestocks CLI
- *
- *   report [--band 0.02] [--json]          the premium report, live from prestocks.com
- *   quote <SYMBOL> [--usd 5] [--pay-with USDC|EURC] [--json]   a Jupiter buy quote for one PreStock (read-only)
- *   serve [--port 8402] [--network solana-devnet]   run the paid report server (in-memory settlement)
- *   mints                                  the 8 mints, one per line
- */
 import { Connection } from "@solana/web3.js";
 import { fetchPreStocks, fetchStats } from "./prestocks.ts";
 import { buildReport, renderReport } from "./report.ts";

@@ -1,26 +1,12 @@
-/**
- * The PreStocks data source.
- *
- * Two public endpoints, no auth:
- *   https://prestocks.com/api/prestocks   the 8 live tokens: mint, token price, mark price, supply
- *   https://prestocks.com/api/stats       daily volume and weekly holder series per symbol
- *
- * `fetchImpl` is injectable so every test and the offline demo run from the
- * fixtures in ./fixtures with no network. The shapes below are what the API
- * returned on 2026-09-20 and what the fixtures pin.
- */
-
 export const PRESTOCKS_API = "https://prestocks.com/api/prestocks";
 export const PRESTOCKS_STATS = "https://prestocks.com/api/stats";
 
-/** One row of /api/prestocks as the API sends it. */
 export interface PreStockRaw {
   name: string;
   symbol: string;
   description: string;
   image: string;
   external_url: string;
-  /** Token-2022 mint on Solana mainnet. Every PreStocks mint starts with "Pre". */
   contract_address: string;
   markPrice: number;
   markValuation: number;
@@ -29,16 +15,12 @@ export interface PreStockRaw {
   supply: number;
 }
 
-/** The same row, normalized and with the one derived figure the agent acts on. */
 export interface PreStock {
   symbol: string;
   name: string;
   mint: string;
-  /** What the token trades at on Solana, USD per token. */
   tokenPrice: number;
-  /** What PreStocks marks the underlying share at, USD per token. */
   markPrice: number;
-  /** tokenPrice / markPrice − 1. Negative means the token trades at a discount to mark. */
   premium: number;
   supply: number;
   markValuation: number;
@@ -56,7 +38,6 @@ export interface Stats {
 
 export type FetchLike = (url: string) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
 
-/** Every PreStocks mint is a Token-2022 mint whose address starts with "Pre". */
 export function isPreStocksMint(mint: string): boolean {
   return /^Pre[1-9A-HJ-NP-Za-km-z]{29,41}$/.test(mint);
 }
@@ -95,7 +76,6 @@ export async function fetchStats(fetchImpl: FetchLike = fetch as FetchLike): Pro
   return s;
 }
 
-/** The most recent daily volume and weekly holder count for one symbol, if the series has it. */
 export function latestStats(stats: Stats, symbol: string): { volumeUsd?: number; volumeDate?: string; holders?: number; holdersWeek?: string } {
   const v = [...stats.volume].reverse().find((r) => typeof r[symbol] === "number");
   const h = [...stats.holders].reverse().find((r) => typeof r[symbol] === "number");
@@ -107,7 +87,6 @@ export function latestStats(stats: Stats, symbol: string): { volumeUsd?: number;
   };
 }
 
-/** A fetch that serves the pinned fixtures, for tests and the offline demo. */
 export function fixtureFetch(files: { prestocks: unknown; stats?: unknown }): FetchLike {
   return async (url: string) => {
     const body = url === PRESTOCKS_API ? files.prestocks : url === PRESTOCKS_STATS ? files.stats : undefined;

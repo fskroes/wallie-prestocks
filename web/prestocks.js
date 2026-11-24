@@ -1,6 +1,3 @@
-/* prestocks.js — renders the PreStocks premium report page from a data.json produced by demo/run.ts.
-   Shared verbatim by web/index.html in this repo and /prestocks.html on onewallie.com (assets/prestocks.js).
-   Every figure on the page comes from the data file; nothing is typed by hand. */
 (async () => {
   "use strict";
   const $ = (s) => document.querySelector(s);
@@ -22,7 +19,6 @@
   const R = first?.report;
   if (!R) return;
 
-  // ---- the table: every PreStock, ranked ----
   const cls = (s) => (s === "discount" ? "disc" : s === "premium" ? "prem" : "");
   $("#board tbody").innerHTML = R.ranked.map((sym) => {
     const l = R.lines.find((x) => x.symbol === sym);
@@ -45,7 +41,6 @@
     $("#dearest").innerHTML = `<b>${esc(R.dearest.symbol)}</b> ${pct(R.dearest.premium)}`;
   }
 
-  // ---- the run: polls, alerts, buy decisions, money ----
   const alertCls = (rule) => ({ discount: "ok", premium: "warn", crossed: "lock" })[rule] || "warn";
   $("#run-head").innerHTML =
     `mode <b>${esc(live.mode)}</b> · agent <span class="addr">${esc(live.agent)}</span><br>` +
@@ -67,7 +62,6 @@
     (mainnetBuys.length ? ` · ${mainnetBuys.length} real swap${mainnetBuys.length > 1 ? "s" : ""} on Solana mainnet` : live.mode === "mainnet" ? "" : " · buys were dry runs against live Jupiter quotes") +
     (live.stoppedBy ? ` · stopped by ${esc(live.stoppedBy)}` : "");
 
-  // ---- the ledger: one audit trail for reports and buys ----
   if (live.ledger && $("#ledger")) {
     $("#ledger").textContent = live.ledger.map((e) => {
       const t = e.at.slice(11, 19);

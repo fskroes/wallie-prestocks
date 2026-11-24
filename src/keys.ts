@@ -1,15 +1,3 @@
-/**
- * Load a Solana signing key from a file, in any of the shapes people actually have:
- *
- *   [12,34,…]                       a 64-number JSON array (solana-keygen)
- *   5Kd3…                           a base58 64-byte secret (Phantom / Backpack export)
- *   private_key_base58=5Kd3…        key=value lines (any label with "private" or "secret");
- *                                   an `address=` line is checked against the key
- *
- * A 32-byte value is taken as a seed. Any other length is refused. If the file
- * names an address and the key derives a different one, that is an error: the
- * wrong key must never sign a swap.
- */
 import fs from "node:fs";
 import { Keypair } from "@solana/web3.js";
 
@@ -49,12 +37,10 @@ export function base58Encode(bytes: Uint8Array): string {
   return s;
 }
 
-/** Any label that contains one of these words names the secret; `private_key_base58`, `secretKey`, `PRIVATE=` all match. */
 const SECRET_WORDS = ["private", "secret"];
 const ADDRESS_WORDS = ["address", "public", "pubkey"];
 const labelFor = (m: Map<string, string>, words: string[]) => [...m.keys()].find((k) => words.some((w) => k.includes(w)));
 
-/** key=value lines → a map with lower-cased keys. Lines without `=` are ignored. */
 function kv(text: string): Map<string, string> {
   const m = new Map<string, string>();
   for (const raw of text.split(/\r?\n/)) {
@@ -78,7 +64,6 @@ function bytesOf(value: string): Uint8Array {
 
 export interface ParsedKey {
   keypair: Keypair;
-  /** The address the file claimed, if any. Always equal to keypair.publicKey when returned. */
   claimedAddress?: string;
   form: "json-array" | "base58" | "key=value";
 }
